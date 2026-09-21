@@ -84,12 +84,27 @@ export class ExtensionSelectorComponent extends Container {
 
 	private updateList(): void {
 		this.listContainer.clear();
-		for (let i = 0; i < this.options.length; i++) {
+
+		// Window the list around the selection (same approach as ModelSelectorComponent)
+		// so long option lists stay inside the viewport with the cursor visible.
+		const maxVisible = 10;
+		const startIndex = Math.max(
+			0,
+			Math.min(this.selectedIndex - Math.floor(maxVisible / 2), this.options.length - maxVisible),
+		);
+		const endIndex = Math.min(startIndex + maxVisible, this.options.length);
+
+		for (let i = startIndex; i < endIndex; i++) {
 			const isSelected = i === this.selectedIndex;
 			const text = isSelected
 				? theme.fg("accent", "→ ") + theme.fg("accent", this.options[i])
 				: `  ${theme.fg("text", this.options[i])}`;
 			this.listContainer.addChild(new Text(text, 1, 0));
+		}
+
+		if (startIndex > 0 || endIndex < this.options.length) {
+			const scrollInfo = theme.fg("muted", `  (${this.selectedIndex + 1}/${this.options.length})`);
+			this.listContainer.addChild(new Text(scrollInfo, 1, 0));
 		}
 	}
 
